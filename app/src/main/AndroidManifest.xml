@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The app works on any Android phone that has a SIM/telephony. -->
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+
+    <!-- WHY EACH PERMISSION IS NEEDED
+         READ_PHONE_STATE   : to know when the phone is ringing.
+         READ_CALL_LOG      : Android 9+ only gives the caller's number to apps that also hold this.
+                              The app does NOT read or copy your call log.
+         SEND_SMS           : to send the automatic SMS reply.
+         READ_CONTACTS      : OPTIONAL. Shows the caller's name and lets you pick excluded contacts.
+         INTERNET           : ONLY used for the optional WhatsApp Business messages.
+         ACCESS_NETWORK_STATE: to check if internet is available before sending WhatsApp.
+         REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: lets you ask Android to not put the app to sleep. -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application
+        android:name=".GaneshApp"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.GaneshHosiery">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Observes phone state (ringing / answered / ended). Only the Android system can send this broadcast. -->
+        <receiver
+            android:name=".call.CallStateReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Receives the phone's own "SMS sent / failed" result. Not reachable by other apps. -->
+        <receiver
+            android:name=".messaging.SmsStatusReceiver"
+            android:exported="false" />
+    </application>
+</manifest>

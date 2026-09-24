@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screens are drawn with Jetpack Compose; this theme only styles the window while the app starts. -->
+    <style name="Theme.GaneshHosiery" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:colorPrimary">#1F3A5F</item>
+        <item name="android:colorAccent">#E87A00</item>
+    </style>
+</resources>
