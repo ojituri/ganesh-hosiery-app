@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -47,7 +46,9 @@ fun ExcludedContactsScreen(
     val contacts by viewModel.contacts.collectAsState()
     val message by viewModel.message.collectAsState()
 
-    var showAddDialog by remember { mutableStateOf(false) }
+    var showAddDialog by remember {
+        mutableStateOf(false)
+    }
 
     val context = LocalContext.current
 
@@ -165,15 +166,12 @@ fun ExcludedContactsScreen(
                                     }
                                 )
 
-                                IconButton(
+                                TextButton(
                                     onClick = {
                                         viewModel.delete(contact.id)
                                     }
                                 ) {
-                                    Icon(
-                                        imageVector = androidx.compose.material.icons.Icons.Filled.Delete,
-                                        contentDescription = "Remove"
-                                    )
+                                    Text("Delete")
                                 }
                             }
                         }
@@ -201,10 +199,6 @@ fun ExcludedContactsScreen(
         )
     }
 
-    /*
-     * Clear the ViewModel message after it has been received.
-     * This does not affect the compilation and keeps the existing behavior.
-     */
     LaunchedEffect(message) {
         if (message != null) {
             viewModel.clearMessage()
@@ -292,9 +286,9 @@ fun BackIcon(
     IconButton(
         onClick = onBack
     ) {
-        Icon(
-            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back"
+        Text(
+            text = "←",
+            style = MaterialTheme.typography.titleLarge
         )
     }
 }
