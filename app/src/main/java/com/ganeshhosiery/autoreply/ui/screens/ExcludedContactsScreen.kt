@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.ganeshhosiery.autoreply.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,10 +23,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,53 +40,140 @@ import com.ganeshhosiery.autoreply.ui.components.BigActionButton
 import com.ganeshhosiery.autoreply.viewmodel.ExcludedContactsViewModel
 
 @Composable
-fun ExcludedContactsScreen(onBack: () -> Unit, viewModel: ExcludedContactsViewModel = viewModel()) {
+fun ExcludedContactsScreen(
+    onBack: () -> Unit,
+    viewModel: ExcludedContactsViewModel = viewModel()
+) {
     val contacts by viewModel.contacts.collectAsState()
     val message by viewModel.message.collectAsState()
+
     var showAddDialog by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
 
-    val pickContact = rememberLauncherForActivityResult(ActivityResultContracts.PickContact()) { uri ->
+    val pickContact = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickContact()
+    ) { uri ->
         if (uri != null) {
             val picked = ContactsHelper.readPicked(context, uri)
-            if (picked != null) viewModel.addContact(picked.name, picked.number)
+
+            if (picked != null) {
+                viewModel.addContact(
+                    picked.name,
+                    picked.number
+                )
+            }
         }
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Excluded Contacts") }, navigationIcon = { BackIcon(onBack) })
+            TopAppBar(
+                title = {
+                    Text("Excluded Contacts")
+                },
+                navigationIcon = {
+                    BackIcon(onBack)
+                }
+            )
         }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+
             Text(
-                "Numbers on this list will NEVER receive an automatic SMS or WhatsApp message — for example family members, staff, or suppliers.",
+                text = "Numbers on this list will NEVER receive an automatic SMS or WhatsApp message — for example family members, staff, or suppliers.",
                 style = MaterialTheme.typography.bodyMedium
             )
-            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                BigActionButton("Pick from Contacts", modifier = Modifier.weight(1f)) { pickContact.launch(null) }
-                BigActionButton("Add Manually", modifier = Modifier.weight(1f)) { showAddDialog = true }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+
+                BigActionButton(
+                    text = "Pick from Contacts",
+                    modifier = Modifier.weight(1f)
+                ) {
+                    pickContact.launch(null)
+                }
+
+                BigActionButton(
+                    text = "Add Manually",
+                    modifier = Modifier.weight(1f)
+                ) {
+                    showAddDialog = true
+                }
             }
 
             if (contacts.isEmpty()) {
-                Text("No excluded numbers yet.", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = "No excluded numbers yet.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(contacts, key = { it.id }) { c ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+
+                items(
+                    items = contacts,
+                    key = { it.id }
+                ) { contact ->
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+
                             Column {
-                                Text(c.name, style = MaterialTheme.typography.bodyLarge)
-                                Text(PhoneUtils.display(c.number), style = MaterialTheme.typography.bodyMedium)
+
+                                Text(
+                                    text = contact.name,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+
+                                Text(
+                                    text = PhoneUtils.display(contact.number),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
+
                             Row {
-                                Switch(checked = c.enabled, onCheckedChange = { viewModel.setEnabled(c.id, it) })
-                                IconButton(onClick = { viewModel.delete(c.id) }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Remove")
+
+                                Switch(
+                                    checked = contact.enabled,
+                                    onCheckedChange = { enabled ->
+                                        viewModel.setEnabled(
+                                            contact.id,
+                                            enabled
+                                        )
+                                    }
+                                )
+
+                                IconButton(
+                                    onClick = {
+                                        viewModel.delete(contact.id)
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.Filled.Delete,
+                                        contentDescription = "Remove"
+                                    )
                                 }
                             }
                         }
@@ -99,47 +184,117 @@ fun ExcludedContactsScreen(onBack: () -> Unit, viewModel: ExcludedContactsViewMo
     }
 
     if (showAddDialog) {
+
         AddExcludedDialog(
-            onDismiss = { showAddDialog = false },
+            onDismiss = {
+                showAddDialog = false
+            },
             onAdd = { name, number ->
-                viewModel.addContact(name, number)
+
+                viewModel.addContact(
+                    name,
+                    number
+                )
+
                 showAddDialog = false
             }
         )
     }
 
+    /*
+     * Clear the ViewModel message after it has been received.
+     * This does not affect the compilation and keeps the existing behavior.
+     */
     LaunchedEffect(message) {
-        // Message is shown inline via a Snackbar-less simple text under the fields is skipped for brevity;
-        // the dialog and add-flow already give feedback. Clear after showing once.
-        if (message != null) viewModel.clearMessage()
+        if (message != null) {
+            viewModel.clearMessage()
+        }
     }
 }
 
 @Composable
-private fun AddExcludedDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var number by remember { mutableStateOf("") }
+private fun AddExcludedDialog(
+    onDismiss: () -> Unit,
+    onAdd: (String, String) -> Unit
+) {
+    var name by remember {
+        mutableStateOf("")
+    }
+
+    var number by remember {
+        mutableStateOf("")
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add excluded number") },
+
+        title = {
+            Text("Add excluded number")
+        },
+
         text = {
+
             Column {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name (optional)") })
+
                 OutlinedTextField(
-                    value = number, onValueChange = { number = it },
-                    label = { Text("Phone number") },
-                    modifier = Modifier.padding(top = 8.dp)
+                    value = name,
+                    onValueChange = {
+                        name = it
+                    },
+                    label = {
+                        Text("Name (optional)")
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = number,
+                    onValueChange = {
+                        number = it
+                    },
+                    label = {
+                        Text("Phone number")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
                 )
             }
         },
-        confirmButton = { TextButton(onClick = { onAdd(name, number) }, enabled = number.isNotBlank()) { Text("Add") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+
+        confirmButton = {
+
+            TextButton(
+                onClick = {
+                    onAdd(name, number)
+                },
+                enabled = number.isNotBlank()
+            ) {
+                Text("Add")
+            }
+        },
+
+        dismissButton = {
+
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text("Cancel")
+            }
+        }
     )
 }
 
 @Composable
-fun BackIcon(onBack: () -> Unit) {
-    IconButton(onClick = onBack) {
-        Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+fun BackIcon(
+    onBack: () -> Unit
+) {
+    IconButton(
+        onClick = onBack
+    ) {
+        Icon(
+            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back"
+        )
     }
 }
